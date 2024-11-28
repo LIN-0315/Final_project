@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deposit</title>
+</head>
+<body>
+    <h1>Deposit to {{ account.account_type }} Account</h1>
+    <p><strong>Account Number:</strong> {{ account.account_number }}</p>
+    <p><strong>Current Balance:</strong> ${{ account.balance }}</p>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="amount">Amount:</label>
+        <input type="number" step="0.01" name="amount" id="amount" required>
+        <button type="submit">Deposit</button>
+    </form>
+
+    <a href="{% url 'account_list' %}">Back to Accounts</a>
+</body>
+</html>
