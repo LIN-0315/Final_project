@@ -12,12 +12,12 @@ def deposit_view(request,account_id):
         try:
             amount = Decimal(request.POST.get('amount', '0'))
             # If the amount to deposit is smaller than 0, raise an error
-            if amount < 0:
+            if amount <= 0:
                 messages.warning(request, "Deposit amount must be greater than zero. Please try again.")
                 raise ValueError()
             else:
                 account.deposit(amount)  # Use deposit function in the account view
-                Transaction.objects.create(user=request.user, transaction_type='DEPOSIT', amount=amount)
+                Transaction.objects.create(user=request.user, account=account, transaction_type='DEPOSIT', amount=amount)
                 messages.success(request, f"Deposited ${amount:.2f} successfully to {account.account_type} account {account.account_number}.")
         except ValueError:
             pass
@@ -47,7 +47,7 @@ def withdraw_view(request, account_id):
             account.withdraw(amount)  # Use withdraw function in the account view
             Transaction.objects.create(user=request.user, transaction_type='WITHDRAW', amount=amount)
             messages.success(request,
-                                    f"Withdraw ${amount:.2f} successfully to {account.account_type} account {account.account_number}.")
+                             f"Withdraw ${amount:.2f} successfully to {account.account_type} account {account.account_number}.")
         except ValueError:
             pass
     # redirect to the withdrawal view

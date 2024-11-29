@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
+from accounts import views
 
 def home_view(request):
     return HttpResponse("<h1>Welcome to the Bank System</h1><p><a href='/accounts/login/'>Login</a> or <a href='/accounts/register/'>Register</a></p>")
@@ -26,4 +27,5 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('transactions/', include('transactions.urls')),
     path('', home_view, name='home'),
+    path('transfer/<int:account_id>/', views.transfer_view, name='transfer'),
 ]

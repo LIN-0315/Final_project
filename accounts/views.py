@@ -7,6 +7,7 @@ from .forms import UserRegistrationForm, AccountCreationForm
 from .models import Account
 from transactions.models import Transaction
 from django.urls import reverse
+from decimal import Decimal
 
 
 # User register
@@ -123,3 +124,68 @@ def account_login_view(request, account_id):
 def account_detail_view(request, account_id):
     account = get_object_or_404(Account, id=account_id, user=request.user)
     return render(request, 'accounts/account_detail.html', {'account': account})
+
+@login_required
+def transfer_view(request, account_id=None):
+    sender_account = None
+    if account_id:
+        # pre-write the sender account number
+        try:
+            sender_account = Account.objects.get(id=account_id, user=request.user)
+        except Account.DoesNotExist:
+            messages.warning(request, "Sender account not found.")
+            return render(request, 'accounts/transfer.html', {'sender_account': sender_account})
+
+    if request.method == 'POST':
+        sender_username = request.POST.get('sender_username')
+        sender_account_number = request.POST.get('sender_account_number')
+        sender_account_password = request.POST.get('sender_account_password')
+        receiver_account_number = request.POST.get('receiver_account_number')
+        amount = Decimal(request.POST.get('amount', '0'))
+
+        # verify transfer amount
+        if amount <= 0:
+            messages.warning(request, "Transfer amount must be greater than zero.")
+            return render(request, 'accounts/transfer.html')
+
+        # verify the account number
+        try:
+            sender_account = Account.objects.get(account_number=sender_account_number, user=request.user)
+        except Account.DoesNotExist:
+            messages.warning(request, "Sender account not found.")
+            return render(request, 'accounts/transfer.html', {'sender_account': None})
+
+        if not sender_account.check_account_password(sender_account_password):
+            messages.warning(request, "Invalid sender password.")
+            return render(request, 'accounts/transfer.html')
+
+        # verify enough balance
+        if sender_account.balance < amount:
+            messages.warning(request, "Insufficient balance.")
+            return render(request, 'accounts/transfer.html')
+
+        # verify the receiver account number
+        try:
+            receiver_account = Account.objects.get(account_number=receiver_account_number)
+        except Account.DoesNotExist:
+            messages.warning(request, "Receiver account not found.")
+            return render(request, 'accounts/transfer.html', {'sender_account': sender_account})
+
+        # transfer
+        sender_account.withdraw(amount)
+        receiver_account.deposit(amount)
+
+        # create transaction
+        Transaction.objects.create(user=request.user,
+                                   account=sender_account,
+                                   transaction_type='TRANSFER OUT',
+                                   amount=amount)
+
+        Transaction.objects.create(user=request.user,
+                                   account=receiver_account,
+                                   transaction_type='TRANSFER IN',
+                                   amount=amount)
+
+        messages.success(request, f"Transferred ${amount:.2f} successfully to account {receiver_account.account_number}.")
+
+    return render(request, 'accounts/transfer.html', {'sender_account': sender_account})
