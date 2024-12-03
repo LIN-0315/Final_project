@@ -5,6 +5,13 @@
 </head>
 <body>
     <h1>Your Accounts</h1>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     <a href="{% url 'create_account' %}">Create a New Account</a>
     <ul>
         {% for account in accounts %}
@@ -12,15 +19,27 @@
                 <strong>{{ account.account_type }} Account</strong><br>
                 Account Number: {{ account.account_number }}<br>
                 Balance: ${{ account.balance }}<br>
-                {% if account.account_type == 'Credit Card' %}
 
-                    Maximum Credit Available: ${{ account.max_credit_available }}<br>
-
-                    Initial credit is $1000.00<br>
+                Status:
+                {% if account.is_locked %}
+                    <span style="color: red;">Locked</span>
+                {% else %}
+                    <span style="color: green;">Active</span>
                 {% endif %}<br>
-                <a href="{% url 'deposit' account.id %}">Deposit</a>
-                <a href="{% url 'withdraw' account.id %}">Withdraw</a>
-                <a href="{% url 'transfer' account.id %}">Transfer</a>
+                <a href="{% url 'account_lock' account.id %}">
+                    {% if account.is_locked %}Unlock<br>{% else %}Lock{% endif %}
+                </a><br>
+                {% if not account.is_locked %}
+                    {% if account.account_type == 'Credit Card' %}
+
+                        Maximum Credit Available: ${{ account.max_credit_available }}<br>
+
+                        Initial credit is $1000.00<br>
+                    {% endif %}<br>
+                    <a href="{% url 'deposit' account.id %}">Deposit</a>
+                    <a href="{% url 'withdraw' account.id %}">Withdraw</a>
+                    <a href="{% url 'transfer' account.id %}">Transfer</a>
+                {% endif %}
                 <a href="{% url 'account_detail' account.id %}">View Details</a>
 
             </li>

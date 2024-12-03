@@ -103,22 +103,6 @@ def create_account_view(request):
     return render(request, 'accounts/create_account.html', {'form': form})
 
 
-# login account
-@login_required
-def account_login_view(request, account_id):
-    account = get_object_or_404(Account, id=account_id, user=request.user)
-
-    if request.method == 'POST':
-        account_password = request.POST.get('account_password')
-        if account.check_account_password(account_password):
-            # verify the password
-            return redirect(reverse('account_detail', args=[account_id]))
-        else:
-            messages.error(request, "Invalid account password.")
-
-    return redirect('account_list')
-
-
 # account detail
 @login_required
 def account_detail_view(request, account_id):
@@ -189,3 +173,34 @@ def transfer_view(request, account_id=None):
         messages.success(request, f"Transferred ${amount:.2f} successfully to account {receiver_account.account_number}.")
 
     return render(request, 'accounts/transfer.html', {'sender_account': sender_account})
+
+
+# Locked account view
+def account_lock(request, account_id):
+    # Get account
+    account = get_object_or_404(Account, id=account_id, user=request.user)
+
+    if request.method == 'POST':
+        account_password = request.POST.get('account_password')
+
+        # Check password
+        if not account.check_account_password(account_password):
+            messages.warning(request, "Invalid account password.")
+            return render(request, 'accounts/lock.html', {'account': account})
+
+        # Change Lock status
+        account.is_locked = not account.is_locked
+        account.save()
+
+        # Tell user lock is success
+        if account.is_locked:
+            messages.success(request, f"Account {account.account_number} has been locked.")
+        else:
+            messages.success(request, f"Account {account.account_number} has been unlocked.")
+        # Redirect to the account_list view when success
+        return redirect('account_list')
+
+    # Redirect to the lock view
+    return render(request, 'accounts/lock.html', {'account': account})
+
+

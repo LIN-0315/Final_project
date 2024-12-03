@@ -8,6 +8,12 @@ from decimal import Decimal
 @login_required
 def deposit_view(request,account_id):
     account = get_object_or_404(Account, id=account_id, user=request.user)  # get account number
+
+    # Check the account is locked
+    if account.is_locked:
+        messages.warning(request, "This account is locked and cannot deposit.")
+        return redirect('account_list')
+
     if request.method == 'POST':
         try:
             amount = Decimal(request.POST.get('amount', '0'))
@@ -27,6 +33,12 @@ def deposit_view(request,account_id):
 @login_required
 def withdraw_view(request, account_id):
     account = get_object_or_404(Account, id=account_id, user=request.user)  # get account number
+
+    # Check the account is locked
+    if account.is_locked:
+        messages.warning(request, "This account is locked and cannot deposit.")
+        return redirect('account_list')
+
     if request.method == 'POST':
         # If the amount to withdraw is smaller than 0, raise an error
         try:
@@ -45,7 +57,7 @@ def withdraw_view(request, account_id):
                     raise ValueError()
 
             account.withdraw(amount)  # Use withdraw function in the account view
-            Transaction.objects.create(user=request.user, transaction_type='WITHDRAW', amount=amount)
+            Transaction.objects.create(user=request.user, account=account, transaction_type='WITHDRAW', amount=amount)
             messages.success(request,
                              f"Withdraw ${amount:.2f} successfully to {account.account_type} account {account.account_number}.")
         except ValueError:

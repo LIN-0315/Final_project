@@ -56,6 +56,9 @@ class Account(models.Model):
         verbose_name="Created At",
     )
 
+    # Locked_account
+    is_locked = models.BooleanField(default=False)
+
     class Meta:
         verbose_name = "Account"
 

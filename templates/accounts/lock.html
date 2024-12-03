@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% if account.is_locked %}Unlock{% else %}Lock{% endif %} Account</title>
+</head>
+<body>
+    <h1>{% if account.is_locked %}Unlock{% else %}Lock{% endif %} Account</h1>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <p>Account Number: {{ account.account_number }}</p>
+    <p>Balance: ${{ account.balance }}</p>
+    <p>Status: {% if account.is_locked %}<span style="color: red;">Locked</span>{% else %}<span style="color: green;">Active</span>{% endif %}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="account_password">Enter Account Password to {% if account.is_locked %}Unlock{% else %}Lock{% endif %}:</label><br>
+        <input type="password" name="account_password" id="account_password" required><br><br>
+        <button type="submit">{% if account.is_locked %}Unlock{% else %}Lock{% endif %} Account</button>
+    </form>
+
+    <a href="{% url 'account_list' %}">Back to Accounts</a>
+</body>
+</html>

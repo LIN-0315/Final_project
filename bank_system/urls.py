@@ -28,4 +28,5 @@ urlpatterns = [
     path('transactions/', include('transactions.urls')),
     path('', home_view, name='home'),
     path('transfer/<int:account_id>/', views.transfer_view, name='transfer'),
+    path('account/<int:account_id>/lock/', views.account_lock, name='account_lock'),
 ]
