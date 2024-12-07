@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<h2>Delete Account</h2>
+    <p>Account Number: {{ account.account_number }}</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="account_password">Enter Account Password:</label>
+                <input type="password" name="account_password" id="account_password" required>
+            </div>
+            <button type="submit">Delete Account</button>
+        </form>
+        <a href="{% url 'account_list' %}" class="cancel">Cancel</a>

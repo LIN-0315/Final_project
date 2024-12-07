@@ -41,6 +41,7 @@
                     <a href="{% url 'transfer' account.id %}">Transfer</a>
                 {% endif %}
                 <a href="{% url 'account_detail' account.id %}">View Details</a>
+                <a href="{% url 'delete_account' account.id %}" style="color: red;">Delete</a>
 
             </li>
         {% endfor %}

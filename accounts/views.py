@@ -6,7 +6,6 @@ from django.contrib import messages
 from .forms import UserRegistrationForm, AccountCreationForm
 from .models import Account
 from transactions.models import Transaction
-from django.urls import reverse
 from decimal import Decimal
 
 
@@ -23,6 +22,7 @@ def register_view(request):
             messages.error(request, "Registration failed. Please check the form.")
     else:
         form = UserRegistrationForm()
+    # Get request, render form
     return render(request, 'accounts/register.html', {'form': form})
 
 
@@ -39,6 +39,7 @@ def login_view(request):
             messages.error(request, "Invalid username or password.")
     else:
         form = AuthenticationForm()  # Initialize the form
+    # Get request, render form
     return render(request, 'accounts/login.html', {'form': form})
 
 
@@ -81,6 +82,7 @@ def account_list_view(request):
     for account in accounts:
         if account.account_type == 'Credit Card':
             account.max_credit_available = 1000 + account.balance
+    # Get request, render form
     return render(request, 'accounts/account_list.html', {'accounts': accounts})
 
 # create new account
@@ -100,6 +102,7 @@ def create_account_view(request):
             return redirect('account_list')  # redirect to the account list
     else:
         form = AccountCreationForm()
+    # Get request, render form
     return render(request, 'accounts/create_account.html', {'form': form})
 
 
@@ -107,6 +110,7 @@ def create_account_view(request):
 @login_required
 def account_detail_view(request, account_id):
     account = get_object_or_404(Account, id=account_id, user=request.user)
+    # Get request, render form
     return render(request, 'accounts/account_detail.html', {'account': account})
 
 @login_required
@@ -118,6 +122,7 @@ def transfer_view(request, account_id=None):
             sender_account = Account.objects.get(id=account_id, user=request.user)
         except Account.DoesNotExist:
             messages.warning(request, "Sender account not found.")
+            # Get request, render form
             return render(request, 'accounts/transfer.html', {'sender_account': sender_account})
 
     if request.method == 'POST':
@@ -137,15 +142,18 @@ def transfer_view(request, account_id=None):
             sender_account = Account.objects.get(account_number=sender_account_number, user=request.user)
         except Account.DoesNotExist:
             messages.warning(request, "Sender account not found.")
+            # Get request, render form
             return render(request, 'accounts/transfer.html', {'sender_account': None})
 
         if not sender_account.check_account_password(sender_account_password):
             messages.warning(request, "Invalid sender password.")
+            # Get request, render form
             return render(request, 'accounts/transfer.html')
 
         # verify enough balance
         if sender_account.balance < amount:
             messages.warning(request, "Insufficient balance.")
+            # Get request, render form
             return render(request, 'accounts/transfer.html')
 
         # verify the receiver account number
@@ -172,6 +180,7 @@ def transfer_view(request, account_id=None):
 
         messages.success(request, f"Transferred ${amount:.2f} successfully to account {receiver_account.account_number}.")
 
+    # Get request, render form
     return render(request, 'accounts/transfer.html', {'sender_account': sender_account})
 
 
@@ -200,7 +209,28 @@ def account_lock(request, account_id):
         # Redirect to the account_list view when success
         return redirect('account_list')
 
-    # Redirect to the lock view
+    # Get request, render form
     return render(request, 'accounts/lock.html', {'account': account})
+
+
+# Delete account
+@login_required
+def delete_account_view(request, account_id):
+    account = get_object_or_404(Account, id=account_id, user=request.user)
+
+    if request.method == 'POST':
+        account_password = request.POST.get('account_password')
+
+        if not account.check_account_password(account_password):
+            messages.warning(request, "Invalid account password.")
+            return render(request, 'accounts/delete_account.html', {'account': account})
+
+        # Delete the account
+        account.delete()
+        messages.success(request, f"Account {account.account_number} has been deleted successfully.")
+        return redirect('account_list')
+
+    # Get request, render form
+    return render(request, 'accounts/delete_account.html', {'account': account})
 
 

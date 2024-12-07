@@ -19,8 +19,37 @@ from django.urls import path, include
 from django.http import HttpResponse
 from accounts import views
 
+
 def home_view(request):
-    return HttpResponse("<h1>Welcome to the Bank System</h1><p><a href='/accounts/login/'>Login</a> or <a href='/accounts/register/'>Register</a></p>")
+    return HttpResponse("""
+        <!DOCTYPE html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                }
+                .button{
+                    display: flex;
+                    justify-content: center;
+                    gap: 20px;
+            </style>
+        </head>
+        <body>
+            <div>
+                <h1>Welcome to the Bank System</h1>
+                <div class="button">
+                    <a href="/accounts/login/">Login</a>
+                    <a href="/accounts/register/">Register</a>
+                </div>
+            </div>
+        </body>
+        </html>
+    """)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
