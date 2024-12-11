@@ -48,7 +48,7 @@
 
                 <a href="{% url 'account_lock' account.id %}">
 
-                    {% if account.is_locked %}Unlock{% else %}Lock{% endif %}</a>
+                    {% if account.is_locked %}Unlock<br>{% else %}Lock{% endif %}</a>
 
                 <a href="{% url 'account_detail' account.id %}">View Details</a>
                 <a href="{% url 'delete_account' account.id %}" style="color: red;">Delete</a>
