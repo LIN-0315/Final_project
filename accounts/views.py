@@ -80,6 +80,10 @@ def account_list_view(request):
         return redirect('account_list')
     accounts = request.user.accounts.all()  # get accounts for current user
     for account in accounts:
+        if account.account_type == 'Saving':
+            # Account interest variable
+            account.interest = account.balance/100
+        # Account credit variable
         if account.account_type == 'Credit Card':
             account.max_credit_available = 1000 + account.balance
     # Get request, render form

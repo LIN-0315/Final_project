@@ -26,24 +26,34 @@
                 {% else %}
                     <span style="color: green;">Active</span>
                 {% endif %}<br>
-                <a href="{% url 'account_lock' account.id %}">
-                    {% if account.is_locked %}Unlock<br>{% else %}Lock{% endif %}
-                </a><br>
                 {% if not account.is_locked %}
+                    {% if account.account_type == 'Saving' %}
+
+                        Interest: ${{ account.interest }}<br>
+
+                    {% endif %}
+
                     {% if account.account_type == 'Credit Card' %}
 
                         Maximum Credit Available: ${{ account.max_credit_available }}<br>
 
                         Initial credit is $1000.00<br>
                     {% endif %}<br>
+
+                </a>
                     <a href="{% url 'deposit' account.id %}">Deposit</a>
                     <a href="{% url 'withdraw' account.id %}">Withdraw</a>
                     <a href="{% url 'transfer' account.id %}">Transfer</a>
                 {% endif %}
+
+                <a href="{% url 'account_lock' account.id %}">
+
+                    {% if account.is_locked %}Unlock{% else %}Lock{% endif %}</a>
+
                 <a href="{% url 'account_detail' account.id %}">View Details</a>
                 <a href="{% url 'delete_account' account.id %}" style="color: red;">Delete</a>
 
-            </li>
+            </li><br>
         {% endfor %}
     </ul>
 
